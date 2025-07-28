@@ -6,6 +6,9 @@ import io.github.adil_jr.forumhub_api.model.dto.DadosDetalhamentoTopico;
 import io.github.adil_jr.forumhub_api.model.dto.DadosListagemTopico;
 import io.github.adil_jr.forumhub_api.model.entity.Topico;
 import io.github.adil_jr.forumhub_api.service.TopicoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,12 +22,15 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/topicos")
+@SecurityRequirement(name = "bearer-key")
+@Tag(name = "Tópicos", description = "Operações relacionadas a tópicos do fórum")
 public class TopicoController {
 
     @Autowired
     private TopicoService topicoService;
 
     @PostMapping
+    @Operation(summary = "Criar novo tópico", description = "Cria um novo tópico no fórum e requer autenticação.")
     public ResponseEntity<DadosDetalhamentoTopico> criar(
             @RequestBody @Valid DadosCadastroTopico dados,
             UriComponentsBuilder uriBuilder
@@ -38,6 +44,7 @@ public class TopicoController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar todos os tópicos", description = "Retorna uma lista paginada de todos os tópicos.")
     public ResponseEntity<Page<DadosListagemTopico>> listar(
             @PageableDefault(size = 10, sort = {"dataCriacao"}) Pageable paginacao,
             @RequestParam(required = false) String cursoNome
@@ -48,12 +55,14 @@ public class TopicoController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Detalhar tópico por ID", description = "Busca e retorna os detalhes de um tópico específico.")
     public ResponseEntity<DadosDetalhamentoTopico> detalhar(@PathVariable Long id) {
         Topico topico = topicoService.detalhar(id);
         return ResponseEntity.ok(new DadosDetalhamentoTopico(topico));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar tópico por ID", description = "Atualiza os dados de um tópico existente com base no seu ID.")
     public ResponseEntity<DadosDetalhamentoTopico> atualizar(
             @PathVariable Long id,
             @RequestBody @Valid DadosAtualizacaoTopico dados
@@ -63,6 +72,7 @@ public class TopicoController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Excluir tópico por ID", description = "Exclui um tópico do banco de dados com base no seu ID. Esta operação não pode ser desfeita.")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         topicoService.deletar(id);
         return ResponseEntity.noContent().build();
